@@ -1,0 +1,136 @@
+import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase-server";
+import { sendContactNotificationEmails } from "@/lib/resend";
+import { rateLimitMiddleware } from "@/lib/rate-limiter";
+import { captchaMiddleware, extractCaptchaToken } from "@/lib/captcha";
+import type { ContactFormPayload } from "@/types";
+
+function validatePayload(data: unknown): data is ContactFormPayload {
+  if (typeof data !== "object" || data === null) return false;
+  const payload = data as Record<string, unknown>;
+
+  const requiredFields = [
+    "firstName",
+    "lastName",
+    "email",
+    "service",
+    "message",
+  ];
+
+  for (const field of requiredFields) {
+    if (typeof payload[field] !== "string" || payload[field].trim() === "") {
+      return false;
+    }
+  }
+
+  // Enhanced honeypot validation - check for hidden fields that bots might fill
+  const honeypotFields = ["website", "phone2", "address", "fax"];
+  for (const field of honeypotFields) {
+    if (payload[field] && typeof payload[field] === "string" && payload[field].trim() !== "") {
+      return false;
+    }
+  }
+
+  // Check for suspicious patterns commonly used by bots
+  const suspiciousPatterns = [
+    /http/i,
+    /www\./i,
+    /\.com/i,
+    /href/i,
+    /<a /i,
+    /<script/i,
+  ];
+
+  const message = payload.message as string;
+  for (const pattern of suspiciousPatterns) {
+    if (pattern.test(message)) {
+      return false;
+    }
+  }
+
+  // Check for excessively long submissions (potential DoS)
+  if (message.length > 5000) {
+    return false;
+  }
+
+  return true;
+}
+
+export async function POST(request: Request) {
+  // Check rate limit before processing the request
+  const rateLimitResult = await rateLimitMiddleware(request, {
+    maxRequests: 5,
+    windowMs: 60 * 60 * 1000, // 1 hour
+  });
+
+  if (!rateLimitResult.allowed && rateLimitResult.response) {
+    return rateLimitResult.response;
+  }
+
+  const body = await request.json();
+
+  // Optional CAPTCHA validation (future-ready)
+  const captchaEnabled = process.env.CAPTCHA_ENABLED === "true";
+  if (captchaEnabled) {
+    const captchaToken = extractCaptchaToken(body, "captchaToken");
+    const captchaConfig = {
+      enabled: true,
+      provider: (process.env.CAPTCHA_PROVIDER as "recaptcha" | "hcaptcha" | "turnstile") || "recaptcha",
+      secretKey: process.env.CAPTCHA_SECRET_KEY,
+      minScore: process.env.CAPTCHA_MIN_SCORE ? parseFloat(process.env.CAPTCHA_MIN_SCORE) : undefined,
+    };
+
+    const captchaResult = await captchaMiddleware(captchaToken, captchaConfig);
+    if (!captchaResult.valid && captchaResult.response) {
+      return captchaResult.response;
+    }
+  }
+
+  if (!validatePayload(body)) {
+    return NextResponse.json(
+      { error: "Invalid form submission. Please fill in all required fields." },
+      { status: 400 }
+    );
+  }
+
+  const payload = body as ContactFormPayload;
+  const tableName = process.env.SUPABASE_CONTACT_TABLE || "contact_requests";
+
+  if (!supabaseAdmin) {
+    return NextResponse.json(
+      { error: "Supabase is not configured. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY." },
+      { status: 500 }
+    );
+  }
+
+  const { error } = await supabaseAdmin.from(tableName).insert([
+    {
+      name: `${payload.firstName.trim()} ${payload.lastName.trim()}`,
+      email: payload.email.trim(),
+      message: payload.message.trim(),
+      // Note: The current database schema only has: id, name, email, message, created_at
+      // Additional fields like phone, company, service are not stored in the current schema
+      // but are kept in the validation for potential future schema expansion
+    },
+  ]);
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message || "Failed to save contact request." },
+      { status: 500 }
+    );
+  }
+
+  try {
+    await sendContactNotificationEmails(payload);
+  } catch (sendError: unknown) {
+    const message = sendError instanceof Error ? sendError.message : String(sendError);
+    console.error('Contact notification email failed:', sendError);
+    return NextResponse.json(
+      { error: `Contact request saved, but email delivery failed: ${message}` },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ success: true }, { status: 201 });
+}

@@ -1,0 +1,17 @@
+{
+  "section": {
+    "label": "Our Work",
+    "title": "Selected Projects",
+    "subtitle": "A showcase of digital experiences that push boundaries and deliver results."
+  },
+  "projects": [
+    {
+      "title": "iShot Reels",
+      "category": "Web Development",
+      "gradient": "from-blue-600/90 to-purple-600/90",
+      "accent": "#3B82F6",
+      "href": "https://ishottreels.vercel.app/",
+      "slug": "ishot-reels"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "tagline": "APEX — Precision. Prestige. Performance.",
+  "headline": "Build a Stronger\nOnline Presence\nwith ApeX.",
+  "description": "We create websites for businesses and AI product posters that help brands look modern, sharp, and professional.",
+  "ctaButtons": [
+    {
+      "text": "View Work",
+      "href": "#work",
+      "variant": "gradient"
+    },
+    {
+      "text": "Contact Us",
+      "href": "#contact",
+      "variant": "glass"
+    }
+  ]
+}

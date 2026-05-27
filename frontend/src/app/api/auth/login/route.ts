@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server-auth';
 import { isAdmin } from '@/lib/auth';
+import {
+  checkLoginRateLimit,
+  recordFailedLoginAttempt,
+  clearLoginFailures,
+} from '@/lib/login-rate-limiter';
 
 interface LoginRequest {
   email: string;
@@ -22,19 +27,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Email and password are required.' }, { status: 400 });
   }
 
-  const { email, password } = body;
+  const email = body.email.trim();
+  const rateLimitStatus = await checkLoginRateLimit(request, email);
+  if (!rateLimitStatus.allowed) {
+    return NextResponse.json(
+      { error: 'Too many failed login attempts. Please try again later.' },
+      { status: 429 }
+    );
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: email.trim(),
-    password: password.trim(),
+    email,
+    password: body.password.trim(),
   });
 
   if (error || !data?.session) {
+    await recordFailedLoginAttempt(request, email);
     const message = error?.message || 'Authentication failed.';
     return NextResponse.json({ error: message }, { status: 401 });
   }
 
-  // Check admin role in database (isAdmin will fall back to env allowlist if no admins exist yet)
   const userForCheck = data.user
     ? {
         id: data.user.id ?? undefined,
@@ -43,8 +56,10 @@ export async function POST(request: Request) {
     : null;
   const adminCheck = await isAdmin(userForCheck);
   if (!adminCheck) {
+    await recordFailedLoginAttempt(request, email);
     return NextResponse.json({ error: 'Unauthorized admin user.' }, { status: 403 });
   }
 
+  await clearLoginFailures(request, email);
   return NextResponse.json({ success: true });
 }

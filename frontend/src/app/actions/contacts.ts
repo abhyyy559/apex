@@ -1,6 +1,7 @@
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { protectAdminRoute } from '@/lib/auth';
 import type { ContactRequest } from '@/types';
 
 export interface PaginatedSubmissionsResult {
@@ -14,6 +15,11 @@ export async function getContactSubmissions(
   cursor: string | null = null
 ): Promise<{ success: boolean; data?: PaginatedSubmissionsResult; error?: string }> {
   try {
+    const auth = await protectAdminRoute();
+    if (!auth.authorized) {
+      throw new Error('Unauthorized');
+    }
+
     const client = supabaseAdmin;
     if (!client) throw new Error('Supabase admin client not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in the environment.');
 
@@ -23,7 +29,6 @@ export async function getContactSubmissions(
       .order('created_at', { ascending: false })
       .limit(limit + 1); // Fetch one extra to determine if there are more results
 
-    // If cursor is provided, fetch records created before the cursor
     if (cursor) {
       query = query.lt('created_at', cursor);
     }
@@ -36,7 +41,6 @@ export async function getContactSubmissions(
     const hasMore = submissions.length > limit;
     const nextCursor = hasMore ? submissions[limit - 1]?.created_at || null : null;
 
-    // Remove the extra record if we fetched more than the limit
     const paginatedSubmissions = hasMore ? submissions.slice(0, limit) : submissions;
 
     return {
@@ -57,6 +61,11 @@ export async function getContactSubmissions(
 // Legacy function for backward compatibility (fetches all records)
 export async function getAllContactSubmissions() {
   try {
+    const auth = await protectAdminRoute();
+    if (!auth.authorized) {
+      throw new Error('Unauthorized');
+    }
+
     const client = supabaseAdmin;
     if (!client) throw new Error('Supabase admin client not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in the environment.');
 
@@ -76,6 +85,11 @@ export async function getAllContactSubmissions() {
 
 export async function deleteContactSubmission(id: string) {
   try {
+    const auth = await protectAdminRoute();
+    if (!auth.authorized) {
+      throw new Error('Unauthorized');
+    }
+
     const client = supabaseAdmin;
     if (!client) throw new Error('Supabase admin client not configured.');
 
@@ -106,6 +120,11 @@ export async function loadMoreSubmissions(cursor: string | null, limit: number =
 
 export async function getAdminDashboardData(limit: number = 20) {
   try {
+    const auth = await protectAdminRoute();
+    if (!auth.authorized) {
+      throw new Error('Unauthorized');
+    }
+
     const client = supabaseAdmin;
     if (!client) throw new Error('Supabase admin client not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in the environment.');
 
@@ -117,12 +136,11 @@ export async function getAdminDashboardData(limit: number = 20) {
     weekAgo.setDate(weekAgo.getDate() - 7);
     weekAgo.setHours(0, 0, 0, 0);
 
-    // Fetch paginated submissions for initial load
     const submissionsQuery = client
       .from('contact_requests')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(limit + 1); // Fetch one extra to determine if there are more results
+      .limit(limit + 1);
 
     const [submissionsResult, totalResult, todayResult, weekResult] = await Promise.all([
       submissionsQuery,
@@ -175,6 +193,11 @@ export async function getAdminDashboardData(limit: number = 20) {
 
 export async function getContactStats() {
   try {
+    const auth = await protectAdminRoute();
+    if (!auth.authorized) {
+      throw new Error('Unauthorized');
+    }
+
     const client = supabaseAdmin;
     if (!client) throw new Error('Supabase admin client not configured.');
 

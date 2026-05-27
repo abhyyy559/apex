@@ -21,27 +21,29 @@ const DEFAULT_CONFIG: RateLimitConfig = {
 /**
  * Extract client IP address from request headers
  */
-function getClientIp(request: Request): string {
-  // Try various headers in order of reliability
+export function getTrustedClientIp(request: Request): string {
   const headers = request.headers;
-  
-  const forwarded = headers.get("x-forwarded-for");
-  if (forwarded) {
-    // x-forwarded-for can contain multiple IPs, take the first one
-    return forwarded.split(",")[0].trim();
-  }
-  
-  const realIp = headers.get("x-real-ip");
-  if (realIp) {
-    return realIp.trim();
-  }
-  
+
   const cfConnectingIp = headers.get("cf-connecting-ip");
   if (cfConnectingIp) {
     return cfConnectingIp.trim();
   }
-  
-  // Fallback - this should rarely happen in production
+
+  const vercelForwardedFor = headers.get("x-vercel-forwarded-for");
+  if (vercelForwardedFor) {
+    return vercelForwardedFor.split(",")[0].trim();
+  }
+
+  const realIp = headers.get("x-real-ip");
+  if (realIp) {
+    return realIp.trim();
+  }
+
+  const forwarded = headers.get("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
+  }
+
   return "unknown";
 }
 
@@ -73,16 +75,16 @@ export async function checkRateLimit(
   config: Partial<RateLimitConfig> = {}
 ): Promise<RateLimitResult> {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
-  const clientIp = getClientIp(request);
-  
+  const clientIp = getTrustedClientIp(request);
+
   if (!supabaseAdmin) {
-    // If Supabase is not configured, allow the request but log a warning
-    console.warn("Supabase not configured for rate limiting, allowing request");
+    console.error("Supabase not configured for rate limiting. Blocking requests until configuration is fixed.");
     return {
-      allowed: true,
+      allowed: false,
       limit: finalConfig.maxRequests,
-      remaining: finalConfig.maxRequests,
+      remaining: 0,
       resetTime: new Date(Date.now() + finalConfig.windowMs),
+      error: "Rate limiting configuration error.",
     };
   }
 
@@ -105,13 +107,12 @@ export async function checkRateLimit(
       .limit(1)
       .single();
 
-    if (fetchError && fetchError.code !== "PGRST116") {
-      // PGRST116 is "not found", which is expected
+    if (fetchError) {
       console.error("Rate limit check failed:", fetchError);
       return {
-        allowed: true, // Fail open on database errors
+        allowed: false,
         limit: finalConfig.maxRequests,
-        remaining: finalConfig.maxRequests,
+        remaining: 0,
         resetTime: new Date(Date.now() + finalConfig.windowMs),
         error: "Rate limit check failed",
       };
@@ -198,11 +199,11 @@ export async function checkRateLimit(
     };
   } catch (error) {
     console.error("Rate limiting error:", error);
-    // Fail open on unexpected errors
+    // Fail closed on unexpected rate limiting failures
     return {
-      allowed: true,
+      allowed: false,
       limit: finalConfig.maxRequests,
-      remaining: finalConfig.maxRequests,
+      remaining: 0,
       resetTime: new Date(Date.now() + finalConfig.windowMs),
       error: "Rate limiting error",
     };

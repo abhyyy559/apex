@@ -1,6 +1,6 @@
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { protectAdminRoute } from '@/lib/auth';
-import { getAdminDashboardData } from '@/app/actions/contacts';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 
 export const dynamic = 'force-dynamic';
@@ -13,11 +13,21 @@ export default async function AdminPage() {
     redirect(auth.redirect || '/admin/login');
   }
 
-  // Fetch dashboard data server-side for better performance and scalability
-  const result = await getAdminDashboardData();
+  // Fetch dashboard data through a protected API route for admin operations.
+  const host = headers().get('x-forwarded-host') ?? headers().get('host');
+  const proto = headers().get('x-forwarded-proto') ?? 'https';
+  const origin = host ? `${proto}://${host}` : process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  const response = await fetch(`${origin}/api/admin/contact?includeStats=true&limit=20`, {
+    cache: 'no-store',
+    headers: {
+      cookie: headers().get('cookie') ?? '',
+    },
+  });
 
-  if (!result.success || !result.data) {
-    console.error('Error fetching admin dashboard data:', result.error);
+  const result = await response.json();
+
+  if (!response.ok || !result.success || !result.data) {
+    console.error('Error fetching admin dashboard data:', result.error || response.statusText);
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-deep px-4">
         <div className="max-w-xl w-full rounded-3xl bg-bg-elevated border border-white/10 p-10 text-center">

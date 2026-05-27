@@ -3,64 +3,13 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { sendContactNotificationEmails } from "@/lib/resend";
 import { rateLimitMiddleware } from "@/lib/rate-limiter";
 import { captchaMiddleware, extractCaptchaToken } from "@/lib/captcha";
+import { contactFormSchema } from "@/lib/validation/contact";
 import type { ContactFormPayload } from "@/types";
 
-function validatePayload(data: unknown): data is ContactFormPayload {
-  if (typeof data !== "object" || data === null) return false;
-  const payload = data as Record<string, unknown>;
-
-  const requiredFields = [
-    "firstName",
-    "lastName",
-    "email",
-    "service",
-    "message",
-  ];
-
-  for (const field of requiredFields) {
-    if (typeof payload[field] !== "string" || payload[field].trim() === "") {
-      return false;
-    }
-  }
-
-  // Enhanced honeypot validation - check for hidden fields that bots might fill
-  const honeypotFields = ["website", "phone2", "address", "fax"];
-  for (const field of honeypotFields) {
-    if (payload[field] && typeof payload[field] === "string" && payload[field].trim() !== "") {
-      return false;
-    }
-  }
-
-  // Check for suspicious patterns commonly used by bots
-  const suspiciousPatterns = [
-    /http/i,
-    /www\./i,
-    /\.com/i,
-    /href/i,
-    /<a /i,
-    /<script/i,
-  ];
-
-  const message = payload.message as string;
-  for (const pattern of suspiciousPatterns) {
-    if (pattern.test(message)) {
-      return false;
-    }
-  }
-
-  // Check for excessively long submissions (potential DoS)
-  if (message.length > 5000) {
-    return false;
-  }
-
-  return true;
-}
-
 export async function POST(request: Request) {
-  // Check rate limit before processing the request
   const rateLimitResult = await rateLimitMiddleware(request, {
     maxRequests: 5,
-    windowMs: 60 * 60 * 1000, // 1 hour
+    windowMs: 60 * 60 * 1000,
   });
 
   if (!rateLimitResult.allowed && rateLimitResult.response) {
@@ -69,7 +18,16 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  // Optional CAPTCHA validation (future-ready)
+  const parsed = contactFormSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.errors[0]?.message || "Invalid form submission." },
+      { status: 400 }
+    );
+  }
+
+  const payload = parsed.data as ContactFormPayload;
+
   const captchaEnabled = process.env.CAPTCHA_ENABLED === "true";
   if (captchaEnabled) {
     const captchaToken = extractCaptchaToken(body, "captchaToken");
@@ -86,28 +44,11 @@ export async function POST(request: Request) {
     }
   }
 
-  if (!validatePayload(body)) {
-    return NextResponse.json(
-      { error: "Invalid form submission. Please fill in all required fields." },
-      { status: 400 }
-    );
-  }
-
-  const payload = body as ContactFormPayload;
-
-  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!EMAIL_RE.test(payload.email.trim())) {
-    return NextResponse.json(
-      { error: "Please enter a valid email address." },
-      { status: 400 }
-    );
-  }
-
   const tableName = process.env.SUPABASE_CONTACT_TABLE || "contact_requests";
 
   if (!supabaseAdmin) {
     return NextResponse.json(
-      { error: "Supabase is not configured. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY." },
+      { error: "Supabase is not configured. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY." },
       { status: 500 }
     );
   }

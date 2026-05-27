@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { deleteContactSubmission, loadMoreSubmissions } from '@/app/actions/contacts';
 
 interface Submission {
   id: string;
@@ -36,7 +35,6 @@ export default function AdminDashboard({
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
-  console.log("Selected Submission:", selectedSubmission);
   const [error, setError] = useState('');
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -49,8 +47,17 @@ export default function AdminDashboard({
     setError('');
 
     try {
-      const result = await loadMoreSubmissions(nextCursor, 20);
+      const url = new URL('/api/admin/contact', window.location.origin);
+      url.searchParams.set('limit', '20');
+      if (nextCursor) url.searchParams.set('cursor', nextCursor);
 
+      const response = await fetch(url.toString());
+      if (!response.ok) {
+        const json = await response.json().catch(() => null);
+        throw new Error(json?.error || 'Failed to load more submissions');
+      }
+
+      const result = await response.json();
       if (!result.success || !result.data) {
         throw new Error(result.error || 'Failed to load more submissions');
       }
@@ -112,10 +119,18 @@ export default function AdminDashboard({
     setError('');
 
     try {
-      const result = await deleteContactSubmission(id);
-      
+      const response = await fetch(`/api/admin/contact/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const json = await response.json().catch(() => null);
+        throw new Error(json?.error || 'Failed to delete submission');
+      }
+
+      const result = await response.json();
       if (!result.success) {
-        throw new Error(result.error);
+        throw new Error(result.error || 'Failed to delete submission');
       }
 
       setSubmissions(submissions.filter(s => s.id !== id));

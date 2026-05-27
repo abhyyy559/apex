@@ -1,7 +1,8 @@
 "use client";
 
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
+import Script from "next/script";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
@@ -30,6 +31,24 @@ export function Contact({ className }: { className?: string }) {
 
   if (!contactData) return null;
 
+  const captchaEnabled = process.env.NEXT_PUBLIC_CAPTCHA_ENABLED === "true";
+  const captchaSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+  const isCaptchaReady = captchaEnabled && Boolean(captchaSiteKey);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaWidgetId = useRef<number | null>(null);
+
+  const renderCaptcha = () => {
+    const widget = (window as any).turnstile;
+    if (!widget || captchaWidgetId.current !== null || !isCaptchaReady) return;
+
+    captchaWidgetId.current = widget.render("#turnstile-widget", {
+      sitekey: captchaSiteKey,
+      callback: (token: string) => setCaptchaToken(token),
+      "error-callback": () => setCaptchaToken(null),
+      "expired-callback": () => setCaptchaToken(null),
+    });
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormState({ status: "loading" });
@@ -52,6 +71,11 @@ export function Contact({ className }: { className?: string }) {
       return;
     }
 
+    if (captchaEnabled && !captchaToken) {
+      setFormState({ status: "error", message: "Please complete the CAPTCHA challenge before submitting." });
+      return;
+    }
+
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -67,6 +91,7 @@ export function Contact({ className }: { className?: string }) {
           service,
           message,
           website,
+          captchaToken: captchaToken ?? undefined,
         }),
       });
 
@@ -75,6 +100,11 @@ export function Contact({ className }: { className?: string }) {
         const errorMessage = json?.error || "Failed to submit your request. Please try again later.";
         setFormState({ status: "error", message: errorMessage });
         return;
+      }
+
+      if (captchaEnabled && (window as any).turnstile && captchaWidgetId.current !== null) {
+        (window as any).turnstile.reset(captchaWidgetId.current);
+        setCaptchaToken(null);
       }
 
       setFormState({ status: "success" });
@@ -273,11 +303,30 @@ export function Contact({ className }: { className?: string }) {
             />
           </div>
 
+          {captchaEnabled && (
+            <div className="mb-6">
+              {isCaptchaReady ? (
+                <>
+                  <Script
+                    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+                    strategy="afterInteractive"
+                    onLoad={renderCaptcha}
+                  />
+                  <div id="turnstile-widget" className="mx-auto max-w-md" />
+                </>
+              ) : (
+                <div className="rounded-xl border border-yellow-400/20 bg-yellow-500/10 p-4 text-sm text-yellow-200">
+                  CAPTCHA is enabled but the site key is not configured. Please contact the site administrator.
+                </div>
+              )}
+            </div>
+          )}
+
           <Button
             type="submit"
             size="md"
             className="w-full"
-            disabled={isSubmitting || sent}
+            disabled={isSubmitting || sent || (captchaEnabled && !isCaptchaReady)}
           >
             {isSubmitting ? "Opening Email Client..." : sent ? "Message Sent" : "Send Message →"}
           </Button>

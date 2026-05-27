@@ -181,9 +181,10 @@ export async function validateCaptcha(
   }
 
   if (!finalConfig.secretKey) {
-    console.error("CAPTCHA is enabled but secret key is not configured");
-    // Fail open if misconfigured to avoid blocking legitimate users
-    return { valid: true };
+    return {
+      valid: false,
+      error: "CAPTCHA is enabled but not configured correctly.",
+    };
   }
 
   switch (finalConfig.provider) {

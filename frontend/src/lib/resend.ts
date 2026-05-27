@@ -1,21 +1,30 @@
 import { Resend } from 'resend';
 import type { ContactFormPayload } from '@/types';
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function getResendConfig() {
   const resendApiKey = process.env.RESEND_API_KEY;
   const resendFromEmail = process.env.RESEND_FROM_EMAIL;
-  const contactToEmail = process.env.CONTACT_TO_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAILS;
+  const contactToEmail = process.env.CONTACT_TO_EMAIL;
 
   if (!resendApiKey) {
-    throw new Error('Missing RESEND_API_KEY. Add it to your frontend/.env.local or production environment.');
+    throw new Error('Missing RESEND_API_KEY. Add it to your production environment.');
   }
 
   if (!resendFromEmail) {
-    throw new Error('Missing RESEND_FROM_EMAIL. Add it to your frontend/.env.local or production environment.');
+    throw new Error('Missing RESEND_FROM_EMAIL. Add it to your production environment.');
   }
 
   if (!contactToEmail) {
-    throw new Error('Missing CONTACT_TO_EMAIL or NEXT_PUBLIC_ADMIN_EMAILS. Add an admin recipient to your env.');
+    throw new Error('Missing CONTACT_TO_EMAIL. Add an admin recipient to your production environment.');
   }
 
   return {
@@ -26,19 +35,28 @@ function getResendConfig() {
 }
 
 function formatAdminHtml(payload: ContactFormPayload) {
+  const firstName = escapeHtml(payload.firstName.trim());
+  const lastName = escapeHtml(payload.lastName.trim());
+  const email = escapeHtml(payload.email.trim());
+  const phone = payload.phone ? escapeHtml(payload.phone.trim()) : undefined;
+  const company = payload.company ? escapeHtml(payload.company.trim()) : undefined;
+  const service = escapeHtml(payload.service.trim());
+  const message = escapeHtml(payload.message.trim()).replace(/\n/g, '<br/>');
+  const website = payload.website ? escapeHtml(payload.website.trim()) : undefined;
+
   return `
     <div style="font-family:system-ui, sans-serif; line-height:1.6; color:#111;">
       <h1>New contact request received</h1>
       <p>A new contact form submission has been saved to Supabase.</p>
       <h2>Submission details</h2>
       <ul>
-        <li><strong>Name:</strong> ${payload.firstName.trim()} ${payload.lastName.trim()}</li>
-        <li><strong>Email:</strong> ${payload.email.trim()}</li>
-        ${payload.phone ? `<li><strong>Phone:</strong> ${payload.phone.trim()}</li>` : ''}
-        ${payload.company ? `<li><strong>Company:</strong> ${payload.company.trim()}</li>` : ''}
-        <li><strong>Service:</strong> ${payload.service.trim()}</li>
-        <li><strong>Message:</strong> ${payload.message.trim()}</li>
-        ${payload.website ? `<li><strong>Website:</strong> ${payload.website.trim()}</li>` : ''}
+        <li><strong>Name:</strong> ${firstName} ${lastName}</li>
+        <li><strong>Email:</strong> ${email}</li>
+        ${phone ? `<li><strong>Phone:</strong> ${phone}</li>` : ''}
+        ${company ? `<li><strong>Company:</strong> ${company}</li>` : ''}
+        <li><strong>Service:</strong> ${service}</li>
+        <li><strong>Message:</strong> ${message}</li>
+        ${website ? `<li><strong>Website:</strong> ${website}</li>` : ''}
       </ul>
       <p style="margin-top:1rem;">View submissions in the admin dashboard to follow up.</p>
     </div>
@@ -46,16 +64,21 @@ function formatAdminHtml(payload: ContactFormPayload) {
 }
 
 function formatUserHtml(payload: ContactFormPayload) {
+  const firstName = escapeHtml(payload.firstName.trim());
+  const email = escapeHtml(payload.email.trim());
+  const company = payload.company ? escapeHtml(payload.company.trim()) : undefined;
+  const service = escapeHtml(payload.service.trim());
+
   return `
     <div style="font-family:system-ui, sans-serif; line-height:1.6; color:#111;">
-      <h1>Thanks for reaching out, ${payload.firstName.trim()}!</h1>
+      <h1>Thanks for reaching out, ${firstName}!</h1>
       <p>We received your message and will review it shortly.</p>
       <p><strong>Your request:</strong></p>
       <ul>
-        <li><strong>Service:</strong> ${payload.service.trim()}</li>
-        ${payload.company ? `<li><strong>Company:</strong> ${payload.company.trim()}</li>` : ''}
+        <li><strong>Service:</strong> ${service}</li>
+        ${company ? `<li><strong>Company:</strong> ${company}</li>` : ''}
       </ul>
-      <p>One of our team members will contact you soon at <strong>${payload.email.trim()}</strong>.</p>
+      <p>One of our team members will contact you soon at <strong>${email}</strong>.</p>
       <p>Have a great day!</p>
     </div>
   `;
@@ -74,7 +97,7 @@ export async function sendContactNotificationEmails(payload: ContactFormPayload)
     resend.emails.send({
       from: config.resendFromEmail,
       to: adminRecipients,
-      subject: `New contact request from ${payload.firstName.trim()} ${payload.lastName.trim()}`,
+      subject: `New contact request from ${escapeHtml(payload.firstName.trim())} ${escapeHtml(payload.lastName.trim())}`,
       html: formatAdminHtml(payload),
     }),
     resend.emails.send({

@@ -13,8 +13,7 @@ export async function getUser() {
 }
 
 // Check if user is admin by querying the `public.admins` table in Supabase.
-// For backward compatibility, if the admins table is empty, fall back to the
-// env-based allowlist (`SUPABASE_ADMIN_EMAILS` or `NEXT_PUBLIC_ADMIN_EMAILS`).
+// If the admins table is empty, fall back only to the server-only env-based allowlist `SUPABASE_ADMIN_EMAILS`.
 export async function isAdmin(user?: { id?: string; email?: string } | null) {
   const currentUser = user ?? (await getUser());
   if (!currentUser || (!currentUser.id && !currentUser.email)) return false;
@@ -46,7 +45,7 @@ export async function isAdmin(user?: { id?: string; email?: string } | null) {
     }
 
     if (!adminsList || (Array.isArray(adminsList) && adminsList.length === 0)) {
-      const adminEmailsRaw = process.env.SUPABASE_ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '';
+      const adminEmailsRaw = process.env.SUPABASE_ADMIN_EMAILS || '';
       const adminEmails = adminEmailsRaw
         .split(',')
         .map((e) => e.trim().toLowerCase())

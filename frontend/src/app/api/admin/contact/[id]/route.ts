@@ -1,0 +1,37 @@
+import { NextResponse } from 'next/server';
+import { protectAdminRoute } from '@/lib/auth';
+import { supabaseAdmin } from '@/lib/supabase-server';
+
+interface Params {
+  params: {
+    id: string;
+  };
+}
+
+export async function DELETE(_request: Request, { params }: Params) {
+  const auth = await protectAdminRoute();
+  if (!auth || !auth.authorized) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { id } = params;
+  if (!id) {
+    return NextResponse.json({ success: false, error: 'Submission id is required.' }, { status: 400 });
+  }
+
+  if (!supabaseAdmin) {
+    return NextResponse.json({ success: false, error: 'Supabase is not configured.' }, { status: 500 });
+  }
+
+  const { error } = await supabaseAdmin
+    .from('contact_requests')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Failed to delete contact submission:', error);
+    return NextResponse.json({ success: false, error: error.message || 'Could not delete submission.' }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}

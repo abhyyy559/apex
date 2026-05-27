@@ -13,62 +13,30 @@ export async function getUser() {
 }
 
 // Check if user is admin by querying the `public.admins` table in Supabase.
-// If the admins table is empty, fall back only to the server-only env-based allowlist `SUPABASE_ADMIN_EMAILS`.
+// This is the single source of truth for admin authorization.
+// The admins table is protected by RLS policies and is enforced at the database level.
 export async function isAdmin(user?: { id?: string; email?: string } | null) {
   const currentUser = user ?? (await getUser());
-  if (!currentUser || (!currentUser.id && !currentUser.email)) return false;
+  if (!currentUser || !currentUser.id) return false;
 
   try {
     const supabase = await createSupabaseServerClient();
 
-    // If we have a user id, check admins by user_id first
-    if (currentUser.id) {
-      const { data, error } = await supabase
-        .from('admins')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .limit(1)
-        .maybeSingle();
-
-      if (!error && data) return true;
-    }
-
-    // If no admins exist yet, allow env-based admin emails for backward compatibility
-    const { data: adminsList, error: listError } = await supabase
+    // Check if user exists in the admins table by user_id
+    // This is the ONLY method of admin authorization
+    const { data, error } = await supabase
       .from('admins')
       .select('id')
-      .limit(1);
+      .eq('user_id', currentUser.id)
+      .limit(1)
+      .maybeSingle();
 
-    if (listError) {
-      console.error('Error checking admins table:', listError);
+    if (error) {
+      console.error('Error checking admins table:', error);
       return false;
     }
 
-    if (!adminsList || (Array.isArray(adminsList) && adminsList.length === 0)) {
-      const adminEmailsRaw = process.env.SUPABASE_ADMIN_EMAILS || '';
-      const adminEmails = adminEmailsRaw
-        .split(',')
-        .map((e) => e.trim().toLowerCase())
-        .filter(Boolean);
-
-      if (currentUser.email && adminEmails.includes(currentUser.email.toLowerCase())) {
-        return true;
-      }
-    }
-
-    // Finally, if user provided an email but was not found above, check by email in admins table
-    if (currentUser.email) {
-      const { data: byEmail, error: byEmailErr } = await supabase
-        .from('admins')
-        .select('id')
-        .eq('email', currentUser.email.toLowerCase())
-        .limit(1)
-        .maybeSingle();
-
-      if (!byEmailErr && byEmail) return true;
-    }
-
-    return false;
+    return !!data;
   } catch (err) {
     console.error('Error checking admin status:', err);
     return false;

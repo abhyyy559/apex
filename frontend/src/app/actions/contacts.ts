@@ -58,7 +58,9 @@ export async function getContactSubmissions(
   }
 }
 
-// Legacy function for backward compatibility (fetches all records)
+// Legacy function for backward compatibility (fetches records with hard limit for performance)
+// ⚠️ DEPRECATED: Use getContactSubmissions() with cursor-based pagination instead
+// This function now enforces a hard limit of 1000 records to prevent memory exhaustion
 export async function getAllContactSubmissions() {
   try {
     const auth = await protectAdminRoute();
@@ -69,13 +71,24 @@ export async function getAllContactSubmissions() {
     const client = supabaseAdmin;
     if (!client) throw new Error('Supabase admin client not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in the environment.');
 
+    const HARD_LIMIT = 1000; // Safety limit to prevent unbounded queries
+
     const { data, error } = await client
       .from('contact_requests')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(HARD_LIMIT);
 
     if (error) throw error;
-    return { success: true, data };
+    
+    if (data && data.length === HARD_LIMIT) {
+      console.warn(
+        `getAllContactSubmissions() reached hard limit of ${HARD_LIMIT} records. ` +
+        'Use getContactSubmissions() with cursor-based pagination for better performance.'
+      );
+    }
+
+    return { success: true, data, _note: 'Use cursor-based pagination for large datasets' };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('Error fetching submissions:', error);

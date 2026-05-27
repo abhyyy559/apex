@@ -56,6 +56,14 @@ export const contactFormSchema = z
       .optional()
       .or(z.literal("")),
     
+    currentWebsite: z
+      .string()
+      .trim()
+      .url("Enter a valid URL")
+      .max(500, "Website URL must not exceed 500 characters")
+      .optional()
+      .or(z.literal("")),
+    
     service: z
       .string()
       .trim()
@@ -83,7 +91,6 @@ export const contactFormSchema = z
       .optional()
       .or(z.literal("")),
   })
-  .strict()
   .superRefine((data, ctx) => {
     // Honeypot check - website field must be empty
     if (data.website && data.website.trim() !== "") {

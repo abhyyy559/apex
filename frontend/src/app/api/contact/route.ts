@@ -7,13 +7,18 @@ import { contactFormSchema } from "@/lib/validation/contact";
 import type { ContactFormPayload } from "@/types";
 
 export async function POST(request: Request) {
-  const rateLimitResult = await rateLimitMiddleware(request, {
-    maxRequests: 5,
-    windowMs: 60 * 60 * 1000,
-  });
+  try {
+    const rateLimitResult = await rateLimitMiddleware(request, {
+      maxRequests: 5,
+      windowMs: 60 * 60 * 1000,
+    });
 
-  if (!rateLimitResult.allowed && rateLimitResult.response) {
-    return rateLimitResult.response;
+    if (!rateLimitResult.allowed && rateLimitResult.response) {
+      return rateLimitResult.response;
+    }
+  } catch (rateLimitError) {
+    console.error("Rate limiting error, allowing request to proceed:", rateLimitError);
+    // Fail open on rate limiting errors to prevent blocking legitimate requests
   }
 
   const body = await request.json();

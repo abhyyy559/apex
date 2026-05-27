@@ -10,12 +10,36 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { useContact } from "@/hooks/useContent";
 import type { ContactFormState } from "@/types";
 
+interface TurnstileWidget {
+  render: (selector: string, options: TurnstileOptions) => number;
+  reset: (widgetId: number) => void;
+}
+
+interface TurnstileOptions {
+  sitekey: string;
+  callback: (token: string) => void;
+  "error-callback": () => void;
+  "expired-callback": () => void;
+}
+
+declare global {
+  interface Window {
+    turnstile?: TurnstileWidget;
+  }
+}
+
 const inputClass =
   "w-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] rounded-lg px-4 py-3 min-h-[44px] text-text-primary placeholder:text-[#555555] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#AAFF00]/40 focus:border-[#AAFF00]/40 transition-colors";
 
 export function Contact({ className }: { className?: string }) {
   const [formState, setFormState] = useState<ContactFormState>({ status: "idle" });
   const { data: contactData, loading: isLoadingContactData } = useContact();
+
+  const captchaEnabled = process.env.NEXT_PUBLIC_CAPTCHA_ENABLED === "true";
+  const captchaSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+  const isCaptchaReady = captchaEnabled && Boolean(captchaSiteKey);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaWidgetId = useRef<number | null>(null);
 
   if (isLoadingContactData) {
     return (
@@ -31,14 +55,8 @@ export function Contact({ className }: { className?: string }) {
 
   if (!contactData) return null;
 
-  const captchaEnabled = process.env.NEXT_PUBLIC_CAPTCHA_ENABLED === "true";
-  const captchaSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
-  const isCaptchaReady = captchaEnabled && Boolean(captchaSiteKey);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const captchaWidgetId = useRef<number | null>(null);
-
   const renderCaptcha = () => {
-    const widget = (window as any).turnstile;
+    const widget = window.turnstile;
     if (!widget || captchaWidgetId.current !== null || !isCaptchaReady) return;
 
     captchaWidgetId.current = widget.render("#turnstile-widget", {
@@ -102,8 +120,8 @@ export function Contact({ className }: { className?: string }) {
         return;
       }
 
-      if (captchaEnabled && (window as any).turnstile && captchaWidgetId.current !== null) {
-        (window as any).turnstile.reset(captchaWidgetId.current);
+      if (captchaEnabled && window.turnstile && captchaWidgetId.current !== null) {
+        window.turnstile.reset(captchaWidgetId.current);
         setCaptchaToken(null);
       }
 

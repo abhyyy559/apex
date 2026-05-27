@@ -7,7 +7,7 @@ function ProjectCard({
   project,
   index,
 }: {
-  project: any;
+  project: PortfolioType["projects"][number];
   index: number;
 }) {
   const spans =

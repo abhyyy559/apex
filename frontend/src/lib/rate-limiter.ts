@@ -45,25 +45,6 @@ function getClientIp(request: Request): string {
   return "unknown";
 }
 
-/**
- * Clean up old rate limit records
- */
-async function cleanupOldRateLimits(): Promise<void> {
-  if (!supabaseAdmin) return;
-  
-  try {
-    const { error } = await supabaseAdmin
-      .from("rate_limits")
-      .delete()
-      .lt("window_start", new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()); // 2 hours ago
-    
-    if (error) {
-      console.error("Rate limit cleanup failed:", error);
-    }
-  } catch (error) {
-    console.error("Rate limit cleanup error:", error);
-  }
-}
 
 /**
  * Check if a request should be rate limited

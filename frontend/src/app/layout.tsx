@@ -1,10 +1,8 @@
-import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { DM_Sans, Syne, Instrument_Serif } from "next/font/google";
 import { Analytics } from "@/components/Analytics";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 import {
-  baseMetadata,
   organizationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo";
@@ -30,7 +28,6 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
-export const metadata: Metadata = baseMetadata();
 
 export default async function RootLayout({
   children,

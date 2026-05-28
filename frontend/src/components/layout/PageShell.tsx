@@ -12,10 +12,21 @@ import { Portfolio } from "@/components/sections/Portfolio";
 import { Services } from "@/components/sections/Services";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { JsonLd } from "@/components/SEO/JsonLd";
+import { serviceSchema, breadcrumbSchema } from "@/lib/seo";
 
 export function PageShell() {
+  const breadcrumbData = [
+    { name: "Home", item: "https://apex-studio-mu.vercel.app/" },
+  ];
+
   return (
     <AppProviders>
+      <JsonLd data={serviceSchema("Cinematic Web Development", "Premium 3D web experiences with immersive animations and cutting-edge technology")} />
+      <JsonLd data={serviceSchema("AI Product Posters", "AI-generated product visuals and marketing materials")} />
+      <JsonLd data={serviceSchema("Brand Identity Design", "Complete brand strategy and visual identity systems")} />
+      <JsonLd data={serviceSchema("UI/UX Design", "User-centered interface design with focus on conversion")} />
+      <JsonLd data={breadcrumbSchema(breadcrumbData)} />
       <CustomCursor />
       <CinematicBackground />
       <div className="relative z-[1]">

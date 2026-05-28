@@ -4,9 +4,10 @@ import { lazy, Suspense } from "react";
 import { CinematicBackground } from "@/components/effects/CinematicBackground";
 import { FloatingGlassNavbar } from "@/components/layout/FloatingGlassNavbar";
 import { Footer } from "@/components/layout/Footer";
+import { PageHero } from "@/components/sections/PageHero";
+import { PageCta } from "@/components/sections/PageCta";
 
 const Portfolio = lazy(() => import("@/components/sections/Portfolio").then(m => ({ default: m.Portfolio })));
-const Contact = lazy(() => import("@/components/sections/Contact").then(m => ({ default: m.Contact })));
 
 function SectionFallback() {
   return (
@@ -25,13 +26,25 @@ export function PortfolioPageClient() {
       <CinematicBackground />
       <div className="relative z-[1]">
         <FloatingGlassNavbar />
-        <main id="main-content" className="pt-32">
+        <main id="main-content">
+          <PageHero
+            label="Portfolio"
+            title="Our Work"
+            description="A curated selection of projects where design meets performance. Each case study reflects our commitment to cinematic quality and measurable impact."
+            ctaText="Start Your Project"
+            ctaHref="/contact"
+            secondaryCtaText="View Services"
+            secondaryCtaHref="/services"
+          />
           <Suspense fallback={<SectionFallback />}>
             <Portfolio />
           </Suspense>
-          <Suspense fallback={<SectionFallback />}>
-            <Contact />
-          </Suspense>
+          <PageCta
+            title="Have a Project in Mind?"
+            description="Let's create something that stands out. We're just one conversation away."
+            ctaText="Start a Conversation"
+            ctaHref="/contact"
+          />
         </main>
         <Footer />
       </div>

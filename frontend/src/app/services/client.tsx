@@ -4,9 +4,11 @@ import { lazy, Suspense } from "react";
 import { CinematicBackground } from "@/components/effects/CinematicBackground";
 import { FloatingGlassNavbar } from "@/components/layout/FloatingGlassNavbar";
 import { Footer } from "@/components/layout/Footer";
+import { PageHero } from "@/components/sections/PageHero";
+import { ServicesProcess } from "@/components/sections/ServicesProcess";
+import { PageCta } from "@/components/sections/PageCta";
 
 const ServicesComponent = lazy(() => import("@/components/sections/Services").then(m => ({ default: m.Services })));
-const Contact = lazy(() => import("@/components/sections/Contact").then(m => ({ default: m.Contact })));
 
 function SectionFallback() {
   return (
@@ -25,13 +27,24 @@ export function ServicesPageClient() {
       <CinematicBackground />
       <div className="relative z-[1]">
         <FloatingGlassNavbar />
-        <main id="main-content" className="pt-32">
+        <main id="main-content">
+          <PageHero
+            label="Services"
+            title="Premium Digital Services"
+            description="From cinematic websites to AI-powered visuals and brand identity systems — we craft digital experiences that elevate your brand and drive results."
+            ctaText="Start Your Project"
+            ctaHref="/contact"
+          />
           <Suspense fallback={<SectionFallback />}>
             <ServicesComponent />
           </Suspense>
-          <Suspense fallback={<SectionFallback />}>
-            <Contact />
-          </Suspense>
+          <ServicesProcess />
+          <PageCta
+            title="Ready to Elevate Your Brand?"
+            description="Let's discuss your vision and create something extraordinary together."
+            ctaText="Get in Touch"
+            ctaHref="/contact"
+          />
         </main>
         <Footer />
       </div>

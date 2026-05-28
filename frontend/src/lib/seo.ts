@@ -104,3 +104,104 @@ export function websiteJsonLd() {
     },
   };
 }
+
+export interface PageMetadataOptions {
+  title: string;
+  description: string;
+  path?: string;
+  keywords?: string[];
+  ogImage?: string;
+  noIndex?: boolean;
+}
+
+export function generatePageMetadata(options: PageMetadataOptions): Metadata {
+  const siteConfig = getSiteConfigData();
+  const path = options.path || "";
+  const canonicalUrl = path ? `${siteConfig.url}${path}` : siteConfig.url;
+  const ogImageUrl = options.ogImage || siteConfig.ogImage;
+
+  return {
+    metadataBase: new URL(siteConfig.url),
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    title: {
+      default: options.title,
+      template: `%s | ${siteConfig.name}`,
+    },
+    description: options.description,
+    keywords: [...siteConfig.keywords, ...(options.keywords || [])],
+    authors: [{ name: siteConfig.name }],
+    creator: siteConfig.name,
+    verification: {
+      google: 'HPp8jhSlmoD8_5r2AbVNPwZLWJIABkiPfRUGJTpgsms',
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: canonicalUrl,
+      siteName: siteConfig.name,
+      title: options.title,
+      description: options.description,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${siteConfig.name} — ${options.title}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: options.title,
+      description: options.description,
+      images: [ogImageUrl],
+      creator: siteConfig.twitter,
+    },
+    robots: {
+      index: !options.noIndex,
+      follow: !options.noIndex,
+    },
+  };
+}
+
+export function serviceSchema(name: string, description: string) {
+  const siteConfig = getSiteConfigData();
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name,
+    description,
+    provider: { "@type": "Organization", name: siteConfig.name },
+    url: siteConfig.url,
+  };
+}
+
+export function faqSchema(faqs: Array<{ question: string; answer: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
+export function breadcrumbSchema(items: Array<{ name: string; item: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: item.item,
+    })),
+  };
+}

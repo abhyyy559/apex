@@ -85,11 +85,11 @@ export function Footer() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-2 xl:grid-cols-3">
             <div>
               <p className="text-sm uppercase tracking-[0.32em] text-white/80 mb-5">Services</p>
-              <ul className="space-y-3">
+          <ul className="space-y-3">
                 <li>
-                  <a href="#services" className="text-sm text-white/70 transition-colors duration-300 hover:text-white">
+                  <Link href="/services" className="text-sm text-white/70 transition-colors duration-300 hover:text-white">
                     View all services
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -97,14 +97,14 @@ export function Footer() {
               <p className="text-sm uppercase tracking-[0.32em] text-white/80 mb-5">Sections</p>
               <ul className="space-y-3">
                 <li>
-                  <a href="#services" className="text-sm text-white/70 transition-colors duration-300 hover:text-white">
+                  <Link href="/services" className="text-sm text-white/70 transition-colors duration-300 hover:text-white">
                     Services
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#about" className="text-sm text-white/70 transition-colors duration-300 hover:text-white">
+                  <Link href="/about" className="text-sm text-white/70 transition-colors duration-300 hover:text-white">
                     About
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -117,9 +117,9 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a href="#contact" className="text-sm text-white/70 transition-colors duration-300 hover:text-white">
+                  <Link href="/contact" className="text-sm text-white/70 transition-colors duration-300 hover:text-white">
                     Hire Us
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

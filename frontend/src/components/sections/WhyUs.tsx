@@ -125,7 +125,7 @@ function GlassCrystal() {
           <defs>
             <linearGradient id="whu-gem-gradient" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="rgba(255,255,255,0.9)" />
-              <stop offset="100%" stopColor="rgba(200,241,53,0.24)" />
+              <stop offset="100%" stopColor="rgba(204,34,0,0.24)" />
             </linearGradient>
           </defs>
           <polygon

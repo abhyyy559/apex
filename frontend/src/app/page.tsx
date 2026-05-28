@@ -1,4 +1,4 @@
-import { PageShell } from "@/components/layout/PageShell";
+import { HomePageClient } from "./home-client";
 import { generatePageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
@@ -9,5 +9,5 @@ export const metadata: Metadata = generatePageMetadata({
 });
 
 export default function Home() {
-  return <PageShell />;
+  return <HomePageClient />;
 }

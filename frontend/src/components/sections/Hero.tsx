@@ -4,8 +4,9 @@ import { useRef, useState, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { FloatingOrbs } from "@/components/effects/FloatingOrbs";
+import { HeroOrbs } from "@/components/effects/HeroOrbs";
 import { Button } from "@/components/ui/Button";
+import { SplitText } from "@/components/ui/SplitText";
 import { useHero } from "@/hooks/useContent";
 import { useEffectCapabilities } from "@/hooks/useEffectCapabilities";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
@@ -20,14 +21,31 @@ export function Hero({ className }: { className?: string }) {
 
   const sectionRef = useRef<HTMLElement>(null);
   const taglineRef = useRef<HTMLParagraphElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!reducedMotion && !lowPower) {
-      const timer = setTimeout(() => setShowOrbs(true), 300);
-      return () => clearTimeout(timer);
+      const timer = setTimeout(() => setShowOrbs(true), 100);
+      const mouseTimer = setTimeout(() => {
+        if (!glowRef.current || reducedMotion) return;
+        const handleMouse = (e: MouseEvent) => {
+          const x = (e.clientX / window.innerWidth) * 100;
+          const y = (e.clientY / window.innerHeight) * 100;
+          gsap.to(glowRef.current, {
+            background: `radial-gradient(600px at ${x}% ${y}%, rgba(204,34,0,0.06) 0%, transparent 70%)`,
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        };
+        window.addEventListener("mousemove", handleMouse);
+        return () => window.removeEventListener("mousemove", handleMouse);
+      }, 500);
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(mouseTimer);
+      };
     }
   }, [reducedMotion, lowPower]);
 
@@ -40,23 +58,12 @@ export function Hero({ className }: { className?: string }) {
       taglineRef.current,
       { opacity: 0, y: 30 },
       { opacity: 1, y: 0, duration: 0.8 }
-    );
-
-    const headlineLines = headlineRef.current?.querySelectorAll(".hero-line");
-    if (headlineLines?.length) {
-      tl.fromTo(
-        headlineLines,
-        { opacity: 0, y: 60, rotateX: -15 },
-        { opacity: 1, y: 0, rotateX: 0, duration: 1, stagger: 0.15 },
-        "-=0.4"
-      );
-    }
-
-    tl.fromTo(
+    )
+    .fromTo(
       descriptionRef.current,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.7 },
-      "-=0.3"
+      "-=0.1"
     );
 
     const ctaButtons = ctaRef.current?.querySelectorAll(".hero-cta");
@@ -108,15 +115,18 @@ export function Hero({ className }: { className?: string }) {
 
   if (!heroData) return null;
 
-  const headlineLines = heroData.headline.split('\n');
-
   return (
     <section
       ref={sectionRef}
       className={`relative min-h-screen flex flex-col justify-center overflow-hidden section-padding pb-0 ${className || ''}`}
       aria-labelledby="hero-heading"
     >
-      {showOrbs && <FloatingOrbs />}
+      {showOrbs && <HeroOrbs />}
+      <div
+        ref={glowRef}
+        className="absolute inset-0 pointer-events-none transition-opacity duration-700"
+        aria-hidden
+      />
       <div className="absolute inset-0 perspective-grid opacity-40 pointer-events-none" aria-hidden />
 
       <div className="relative z-10">
@@ -128,14 +138,21 @@ export function Hero({ className }: { className?: string }) {
         </p>
 
         <h1
-          ref={headlineRef}
           id="hero-heading"
           className="font-[family-name:var(--font-syne)] text-[clamp(2rem,6vw,5rem)] sm:text-[clamp(2.5rem,7vw,5.5rem)] md:text-[clamp(2.5rem,8vw,6.5rem)] font-bold leading-[1.1] sm:leading-[1.05] tracking-[-0.03em] mb-6 md:mb-8 text-text-primary"
         >
-          {headlineLines.map((line, i) => (
-            <span key={i} className="hero-line block leading-[1.1] sm:leading-[1.05] m-0 p-0">
+          {heroData.headline.split('\n').map((line, i) => (
+            <SplitText
+              key={i}
+              as="span"
+              type="chars"
+              stagger={0.015}
+              delay={i * 0.4 + 0.5}
+              scrollTrigger={false}
+              className="block leading-[1.1] sm:leading-[1.05]"
+            >
               {line}
-            </span>
+            </SplitText>
           ))}
         </h1>
 
@@ -148,7 +165,7 @@ export function Hero({ className }: { className?: string }) {
 
         <div ref={ctaRef} className="flex flex-wrap gap-4 md:gap-5">
           {heroData.ctaButtons.map((button, index) => (
-            <span key={index} className="hero-cta inline-block">
+            <span key={index} className="hero-cta inline-block [transform:translateZ(20px)]">
               <Button
                 href={button.href}
                 variant={button.variant as "gradient" | "glass"}

@@ -1,6 +1,7 @@
 "use client";
 
 import { RevealGroup, RevealItem } from "@/components/ui/RevealGroup";
+import { SplitText } from "@/components/ui/SplitText";
 
 type SectionHeadingProps = {
   label?: string;
@@ -36,7 +37,9 @@ export function SectionHeading({
         index={1}
         className="font-[family-name:var(--font-syne)] text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]"
       >
-        <span className="gradient-text-subtle">{title}</span>
+        <SplitText type="words" stagger={0.04} className="inline gradient-text-subtle">
+          {title}
+        </SplitText>
       </RevealItem>
       {subtitle && (
         <RevealItem

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { GradientText } from "@/components/ui/GradientText";
 import { Reveal } from "@/components/ui/Reveal";
 import { RevealGroup, RevealItem } from "@/components/ui/RevealGroup";
+import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { useAbout } from "@/hooks/useContent";
 
 export function About({ className }: { className?: string }) {
@@ -25,6 +26,16 @@ export function About({ className }: { className?: string }) {
   }
 
   if (!aboutData) return null;
+
+  const parseStatValue = (value: string): number => {
+    const cleaned = value.replace(/[^0-9.]/g, '');
+    const parsed = parseFloat(cleaned);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
+  const getStatSuffix = (value: string): string => {
+    return value.replace(/[0-9.]/g, '');
+  };
 
   return (
     <section id="about" className={`relative section-padding z-10 ${className || ''}`} aria-labelledby="about-heading">
@@ -70,7 +81,11 @@ export function About({ className }: { className?: string }) {
                 <RevealItem key={stat.label} index={i}>
                   <Card className="stat-card-ro rounded-xl p-5 md:p-6 transition-all duration-300">
                     <p className="font-[family-name:var(--font-syne)] text-2xl md:text-3xl font-bold accent-ro-gradient mb-1">
-                      {stat.value}
+                      <AnimatedCounter
+                        end={parseStatValue(stat.value)}
+                        suffix={getStatSuffix(stat.value)}
+                        duration={2}
+                      />
                     </p>
                     <p className="text-xs md:text-sm text-text-muted">
                       {stat.label}

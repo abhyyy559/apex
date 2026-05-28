@@ -1,9 +1,15 @@
 "use client";
 
+import { useRef } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useServices } from "@/hooks/useContent";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { Reveal } from "@/components/ui/Reveal";
+import { ParallaxTilt } from "@/components/ui/ParallaxTilt";
 import { Button } from "@/components/ui/Button";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const ICONS: Record<string, React.ReactNode> = {
   cube: (
@@ -22,6 +28,20 @@ const ICONS: Record<string, React.ReactNode> = {
 
 export function ServicesPreview() {
   const { data, loading } = useServices();
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    const cards = sectionRef.current?.querySelectorAll(".svc-card");
+    if (!cards?.length) return;
+    gsap.fromTo(
+      cards,
+      { opacity: 0, y: 60, scale: 0.95 },
+      {
+        opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.12, ease: "power3.out",
+        scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
+      }
+    );
+  }, []);
 
   if (loading) {
     return (
@@ -40,6 +60,7 @@ export function ServicesPreview() {
 
   return (
     <section
+      ref={sectionRef}
       id="services"
       aria-labelledby="services-preview-heading"
       className="relative section-padding"
@@ -54,9 +75,9 @@ export function ServicesPreview() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 md:mt-16">
-          {previewServices.map((service, index) => (
-            <Reveal key={service.number} delay={index * 0.1}>
-              <div className="group relative rounded-2xl p-6 md:p-8 border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(204,34,0,0.2)] transition-all duration-500 min-h-[220px] flex flex-col">
+          {previewServices.map((service) => (
+            <ParallaxTilt key={service.number} maxTilt={6} scale={1.03} glare={true}>
+              <div className="svc-card group relative rounded-2xl p-6 md:p-8 border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(204,34,0,0.2)] transition-all duration-500 min-h-[220px] flex flex-col">
                 <div className="w-10 h-10 mb-5 text-[#CC2200]">
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="w-full h-full">
                     {ICONS[service.icon] || ICONS.cube}
@@ -72,7 +93,7 @@ export function ServicesPreview() {
                   {service.description}
                 </p>
               </div>
-            </Reveal>
+            </ParallaxTilt>
           ))}
         </div>
 

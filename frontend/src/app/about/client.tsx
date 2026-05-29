@@ -10,7 +10,6 @@ import { PageCta } from "@/components/sections/PageCta";
 
 const AboutComponent = lazy(() => import("@/components/sections/About").then(m => ({ default: m.About })));
 const WhyUs = lazy(() => import("@/components/sections/WhyUs").then(m => ({ default: m.WhyUs })));
-const Testimonials = lazy(() => import("@/components/sections/Testimonials").then(m => ({ default: m.Testimonials })));
 
 function SectionFallback() {
   return (
@@ -45,9 +44,6 @@ export function AboutPageClient() {
           </Suspense>
           <Suspense fallback={<SectionFallback />}>
             <WhyUs />
-          </Suspense>
-          <Suspense fallback={<SectionFallback />}>
-            <Testimonials />
           </Suspense>
           <PageCta
             title="Let's Build Together"

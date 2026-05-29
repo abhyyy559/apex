@@ -58,7 +58,7 @@ export function Faq() {
             return (
               <div
                 key={index}
-                className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] overflow-hidden transition-colors duration-300 hover:border-[rgba(204,34,0,0.15)]"
+                className="relative rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] overflow-hidden transition-all duration-300 hover:border-[rgba(204,34,0,0.2)] hover:shadow-[0_0_20px_rgba(204,34,0,0.06)]"
               >
                 <button
                   type="button"

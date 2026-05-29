@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useServices } from "@/hooks/useContent";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ParallaxTilt } from "@/components/ui/ParallaxTilt";
+import { SectionAura } from "@/components/effects/SectionAura";
 import { Button } from "@/components/ui/Button";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -65,6 +66,7 @@ export function ServicesPreview() {
       aria-labelledby="services-preview-heading"
       className="relative section-padding"
     >
+      <SectionAura variant="center" intensity={0.6} />
       <div className="relative z-10 max-w-6xl mx-auto">
         <SectionHeading
           label={data.section.label}

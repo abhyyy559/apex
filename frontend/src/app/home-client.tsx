@@ -3,11 +3,14 @@
 import { lazy, Suspense } from "react";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { CinematicBackground } from "@/components/effects/CinematicBackground";
+import { AuraBackground } from "@/components/effects/AuraBackground";
+import { AuraParticles } from "@/components/effects/AuraParticles";
+import { GlowRings } from "@/components/effects/GlowRings";
 import { FloatingGlassNavbar } from "@/components/layout/FloatingGlassNavbar";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
 import { WhyUs } from "@/components/sections/WhyUs";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { MouseGlow } from "@/components/effects/MouseGlow";
 import { JsonLd } from "@/components/SEO/JsonLd";
 import { serviceSchema, breadcrumbSchema } from "@/lib/seo";
 
@@ -15,7 +18,6 @@ const ServicesPreview = lazy(() => import("@/components/sections/ServicesPreview
 const Roadmap = lazy(() => import("@/components/sections/Roadmap").then(m => ({ default: m.Roadmap })));
 const PortfolioShowcase = lazy(() => import("@/components/sections/PortfolioShowcase").then(m => ({ default: m.PortfolioShowcase })));
 const Faq = lazy(() => import("@/components/sections/Faq").then(m => ({ default: m.Faq })));
-const Testimonials = lazy(() => import("@/components/sections/Testimonials").then(m => ({ default: m.Testimonials })));
 const Contact = lazy(() => import("@/components/sections/Contact").then(m => ({ default: m.Contact })));
 
 function SectionFallback() {
@@ -41,7 +43,11 @@ export function HomePageClient() {
       <JsonLd data={serviceSchema("Brand Identity Design", "Complete brand strategy and visual identity systems")} />
       <JsonLd data={serviceSchema("UI/UX Design", "User-centered interface design with focus on conversion")} />
       <JsonLd data={breadcrumbSchema(breadcrumbData)} />
+      <AuraBackground />
+      <AuraParticles count={30} />
+      <GlowRings />
       <CinematicBackground />
+      <MouseGlow color="rgba(204,34,0,0.07)" size={500} zIndex={10} />
       <div className="relative z-[1]">
         <FloatingGlassNavbar />
         <main id="main-content">
@@ -59,11 +65,6 @@ export function HomePageClient() {
           <Suspense fallback={<SectionFallback />}>
             <Faq />
           </Suspense>
-          <ErrorBoundary>
-            <Suspense fallback={<SectionFallback />}>
-              <Testimonials />
-            </Suspense>
-          </ErrorBoundary>
           <Suspense fallback={<SectionFallback />}>
             <Contact />
           </Suspense>

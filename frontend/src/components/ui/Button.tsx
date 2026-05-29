@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { type ButtonHTMLAttributes, type ReactNode } from "react";
 
-type ButtonVariant = "gradient" | "glass" | "ghost";
+type ButtonVariant = "gradient" | "glass" | "ghost" | "glow" | "outline";
 type ButtonSize = "sm" | "md" | "lg";
 
 const variantClass: Record<ButtonVariant, string> = {
@@ -9,6 +9,10 @@ const variantClass: Record<ButtonVariant, string> = {
   glass: "btn-glass text-text-primary",
   ghost:
     "bg-transparent border border-[rgba(255,255,255,0.08)] text-text-primary hover:border-[rgba(255,255,255,0.22)] hover:bg-[rgba(255,255,255,0.04)]",
+  glow:
+    "btn-glow text-white relative overflow-hidden",
+  outline:
+    "bg-transparent border border-[rgba(204,34,0,0.3)] text-[#CC2200] hover:bg-[rgba(204,34,0,0.08)] hover:border-[#CC2200] hover:shadow-[0_0_20px_rgba(204,34,0,0.15)]",
 };
 
 const sizeClass: Record<ButtonSize, string> = {
@@ -34,7 +38,7 @@ type ButtonAsLink = CommonProps & {
 export type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 const base =
-  "inline-flex items-center justify-center rounded-full uppercase tracking-[0.12em] font-semibold transition-transform duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent min-h-[44px] min-w-[44px] disabled:opacity-60 disabled:pointer-events-none";
+  "inline-flex items-center justify-center rounded-full uppercase tracking-[0.12em] font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent min-h-[44px] min-w-[44px] disabled:opacity-60 disabled:pointer-events-none";
 
 export function Button({
   variant = "gradient",
@@ -49,7 +53,10 @@ export function Button({
     const { href, ...rest } = props;
     return (
       <Link href={href} className={classes} {...rest}>
-        {children}
+        {variant === "glow" && (
+          <span className="absolute inset-0 rounded-full bg-gradient-to-r from-[#CC2200] via-[#FF4422] to-[#CC2200] bg-[length:200%_100%] animate-gradient-shift" />
+        )}
+        <span className="relative z-[1]">{children}</span>
       </Link>
     );
   }
@@ -57,7 +64,10 @@ export function Button({
   const { type = "button", ...rest } = props as ButtonAsButton;
   return (
     <button type={type} className={classes} {...rest}>
-      {children}
+      {variant === "glow" && (
+        <span className="absolute inset-0 rounded-full bg-gradient-to-r from-[#CC2200] via-[#FF4422] to-[#CC2200] bg-[length:200%_100%] animate-gradient-shift" />
+      )}
+      <span className="relative z-[1]">{children}</span>
     </button>
   );
 }

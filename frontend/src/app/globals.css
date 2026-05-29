@@ -1621,463 +1621,86 @@ article {
   }
 }
 
-/* ── Reduced motion ── */
-
 /* ═══════════════════════════════════════════════════════════════
-   WHY US — PREMIUM SERVICES SHOWCASE
-   Glass crystal center · Frosted-glass hexagonal cards
-   Dashed SVG connectors · Lime-to-transparent gradients
+   GLOW ANIMATIONS
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Showcase container ────────────────────────────────────────── */
-.whu-hexagon-showcase {
+@keyframes glow-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 3s ease infinite;
+}
+
+.btn-glow {
   position: relative;
-  width: 100%;
-  height: clamp(540px, 50vw, 680px);
-  max-width: 980px;
-  margin: 0 auto;
-  display: grid;
-  place-items: center;
+  background: rgba(204, 34, 0, 0.1);
+  border: 1px solid rgba(204, 34, 0, 0.25);
+  box-shadow: 0 0 15px rgba(204, 34, 0, 0.1);
+}
+.btn-glow:hover {
+  border-color: rgba(204, 34, 0, 0.5);
+  box-shadow: 0 0 30px rgba(204, 34, 0, 0.25), 0 0 60px rgba(204, 34, 0, 0.1);
 }
 
-/* Center element sits in the exact middle */
-.whu-center {
+.glow-border {
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+.glow-border::before {
+  content: "";
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 4;
-}
-
-/* Wrapper div around GlassCrystal — no additional styling needed */
-.whu-crystal-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ── SVG Connector lines ──────────────────────────────────────── */
-.whu-connectors-svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ── Animated dashed connector lines ─────────────────────────── */
-.whu-connector-line {
-  animation: whu-dash-flow 4s linear infinite;
-}
-
-/* Active connector: 2× faster dash, more vivid */
-.whu-connector-line--active {
-  animation-duration: 1.8s !important;
-}
-
-.whu-endpoint-dot {
-  animation: whu-dot-pulse 2.4s ease-in-out infinite;
-}
-
-/* Stagger each line's animation — nth-child counts <line> siblings in SVG */
-.whu-connector-line:nth-child(1) { animation-delay: 0s;   }
-.whu-connector-line:nth-child(2) { animation-delay: 0.6s; }
-.whu-connector-line:nth-child(3) { animation-delay: 1.2s; }
-.whu-connector-line:nth-child(4) { animation-delay: 1.8s; }
-.whu-connector-line:nth-child(5) { animation-delay: 2.4s; }
-.whu-connector-line:nth-child(6) { animation-delay: 3.0s; }
-
-@keyframes whu-dash-flow {
-  from { stroke-dashoffset: 0;   }
-  to   { stroke-dashoffset: -60; }
-}
-
-@keyframes whu-dot-pulse {
-  0%, 100% { opacity: 0.70; transform: scale(1);    }
-  50%       { opacity: 1;    transform: scale(1.45); }
-}
-
-/* ── Crystal stage (holds rings + crystal) ────────────────────── */
-.whu-crystal-stage {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(220px, 26vw, 300px);
-  height: clamp(220px, 26vw, 300px);
-}
-
-/* ── Subtle orbit rings ───────────────────────────────────────── */
-.whu-orbit-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.whu-orbit-ring--inner {
-  width: clamp(170px, 20vw, 230px);
-  height: clamp(170px, 20vw, 230px);
-  border: 1px solid rgba(204, 34, 0, 0.20);
-  box-shadow:
-    0 0 12px rgba(204, 34, 0, 0.06) inset,
-    0 0 20px rgba(204, 34, 0, 0.04);
-  animation: orbit-rotate 18s linear infinite;
-}
-
-/* Inner ring has a small tick mark to show rotation */
-.whu-orbit-ring--inner::before {
-  content: '';
-  position: absolute;
-  top: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(204, 34, 0, 0.70);
-  box-shadow: 0 0 8px rgba(204, 34, 0, 0.55);
-}
-
-.whu-orbit-ring--outer {
-  width: clamp(230px, 28vw, 310px);
-  height: clamp(230px, 28vw, 310px);
-  border: 1px dashed rgba(204, 34, 0, 0.10);
-  animation: orbit-rotate 28s linear infinite reverse;
-}
-
-/* Outer ring tick mark */
-.whu-orbit-ring--outer::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: rgba(204, 34, 0, 0.45);
-  box-shadow: 0 0 6px rgba(204, 34, 0, 0.30);
-}
-
-/* ── Ambient glow platform behind crystal ─────────────────────── */
-.whu-crystal-glow-base {
-  position: absolute;
-  bottom: 5%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  height: 40%;
-  background: radial-gradient(ellipse at center,
-    rgba(204, 34, 0, 0.12) 0%,
-    rgba(204, 34, 0, 0.04) 45%,
-    transparent 72%
-  );
-  pointer-events: none;
-  z-index: 0;
-  filter: blur(8px);
-}
-
-/* ── Glass 3D Crystal ─────────────────────────────────────────── */
-.whu-glass-crystal {
-  position: relative;
-  z-index: 3;
-  filter:
-    drop-shadow(0 0 22px rgba(204, 34, 0, 0.40))
-    drop-shadow(0 0 55px rgba(204, 34, 0, 0.14))
-    drop-shadow(0 12px 30px rgba(0, 0, 0, 0.50));
-  animation: crystal-float 7s ease-in-out infinite;
-}
-
-.whu-crystal-svg {
-  width: clamp(130px, 16vw, 185px);
-  height: auto;
-  display: block;
-}
-
-/* ── Hexagonal feature cards ───────────────────────────────────── */
-.whu-hexagon-cards {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-}
-
-/* ── Frosted-glass card base ──────────────────────────────────── */
-.whu-hex-card {
-  position: absolute;
-  pointer-events: auto;
-  width: clamp(200px, 24vw, 265px);
-  padding: clamp(1rem, 1.5vw, 1.35rem) clamp(0.875rem, 1.2vw, 1.15rem);
-
-  /* Realistic glassmorphism */
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.055) 0%,
-      rgba(204, 34, 0, 0.020) 35%,
-      rgba(10, 14, 22, 0.88) 100%
-    );
-  backdrop-filter: blur(22px) saturate(1.4);
-  -webkit-backdrop-filter: blur(22px) saturate(1.4);
-
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-top-color: rgba(255, 255, 255, 0.16);
-  border-left-color: rgba(255, 255, 255, 0.13);
-  border-radius: 1.1rem;
-
-  box-shadow:
-    0 20px 48px rgba(0, 0, 0, 0.42),
-    0 6px 16px rgba(0, 0, 0, 0.28),
-    0 0 0 1px rgba(255, 255, 255, 0.025) inset,
-    0 1px 0 rgba(255, 255, 255, 0.07) inset;
-
-  display: flex;
-  align-items: flex-start;
-  gap: 0.875rem;
-  cursor: default;
-  overflow: hidden;
-
-  transition:
-    transform     0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color  0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow    0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity       0.38s ease,
-    filter        0.38s ease;
-}
-
-/* Top-edge glass highlight */
-.whu-hex-card-edge {
-  position: absolute;
-  top: 0;
-  left: 12%;
-  right: 12%;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.28) 30%,
-    rgba(204, 34, 0, 0.22) 60%,
-    transparent
-  );
-  pointer-events: none;
-}
-
-/* Inner shimmer/gradient overlay */
-.whu-hex-card-shimmer {
-  position: absolute;
-  inset: 0;
+  inset: -1px;
   border-radius: inherit;
-  background: radial-gradient(
-    circle at 20% 15%,
-    rgba(204, 34, 0, 0.06) 0%,
-    transparent 55%
-  );
-  pointer-events: none;
-  opacity: 0.6;
-  transition: opacity 0.4s ease;
-}
-
-.whu-hex-card:hover .whu-hex-card-shimmer {
-  opacity: 1;
-}
-
-/* Card hover lift */
-.whu-hex-card:hover {
-  border-color: rgba(204, 34, 0, 0.30);
-  border-top-color: rgba(204, 34, 0, 0.45);
-  box-shadow:
-    0 28px 60px rgba(0, 0, 0, 0.52),
-    0 8px 20px rgba(0, 0, 0, 0.30),
-    0 0 28px rgba(204, 34, 0, 0.10),
-    0 0 0 1px rgba(204, 34, 0, 0.12) inset,
-    0 1px 0 rgba(204, 34, 0, 0.18) inset;
-}
-
-/* ── Active card: arrow is lit, card glows brighter ──────────────────────── */
-.whu-hex-card--active {
-  border-color:     rgba(204, 34, 0, 0.42) !important;
-  border-top-color: rgba(204, 34, 0, 0.65) !important;
-  border-left-color: rgba(204, 34, 0, 0.38) !important;
-  box-shadow:
-    0 26px 58px rgba(0, 0, 0, 0.56),
-    0 8px 22px rgba(0, 0, 0, 0.32),
-    0 0 38px rgba(204, 34, 0, 0.18),
-    0 0 0 1px rgba(204, 34, 0, 0.20) inset,
-    0 1px 0 rgba(204, 34, 0, 0.30) inset !important;
-}
-
-.whu-hex-card--active .whu-hex-card-shimmer {
-  opacity: 1;
-}
-
-.whu-hex-card--active .whu-hex-card-edge {
-  background: linear-gradient(
-    90deg,
+  background: conic-gradient(
+    from 0deg,
     transparent,
-    rgba(204, 34, 0, 0.55) 30%,
-    rgba(255, 255, 255, 0.35) 60%,
+    rgba(204, 34, 0, 0),
+    rgba(204, 34, 0, 0),
+    transparent,
+    rgba(204, 34, 0, 0.06),
+    transparent,
+    rgba(204, 34, 0, 0),
     transparent
   );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  padding: 1px;
+  pointer-events: none;
+  animation: glow-spin 6s linear infinite;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+*:hover > .glow-border::before {
+  opacity: 1;
 }
 
-.whu-hex-card--active .whu-hex-icon {
-  background: linear-gradient(135deg,
-    rgba(204, 34, 0, 0.24) 0%,
-    rgba(204, 34, 0, 0.09) 100%
-  );
-  border-color: rgba(204, 34, 0, 0.48);
-  box-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.20),
-    0 0 22px rgba(204, 34, 0, 0.28),
-    0 0 0 1px rgba(204, 34, 0, 0.12) inset;
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
 }
 
-/* ── Dimmed card: other arrows/cards recede into the background ───────── */
-.whu-hex-card--dimmed {
-  opacity: 0.36;
-  filter: saturate(0.45) brightness(0.78);
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(204, 34, 0, 0.1); }
+  50%      { box-shadow: 0 0 25px rgba(204, 34, 0, 0.25), 0 0 50px rgba(204, 34, 0, 0.1); }
 }
 
-/* ── Card positions — hexagonal layout ────────────────────────── */
-.whu-hex-card--top {
-  top: 5%;
-  left: 50%;
-  transform: translateX(-50%);
+.glow-text-wr {
+  color: #CC2200;
+  text-shadow: 0 0 20px rgba(204, 34, 0, 0.4), 0 0 40px rgba(204, 34, 0, 0.2);
 }
 
-.whu-hex-card--top:hover {
-  transform: translateX(-50%) translateY(-5px) scale(1.02);
-}
-
-.whu-hex-card--top-right {
-  top: 27%;
-  right: 3%;
-}
-
-.whu-hex-card--top-right:hover {
-  transform: translateY(-5px) scale(1.02);
-}
-
-.whu-hex-card--bottom-right {
-  bottom: 27%;
-  right: 3%;
-}
-
-.whu-hex-card--bottom-right:hover {
-  transform: translateY(-5px) scale(1.02);
-}
-
-.whu-hex-card--bottom {
-  bottom: 5%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.whu-hex-card--bottom:hover {
-  transform: translateX(-50%) translateY(-5px) scale(1.02);
-}
-
-.whu-hex-card--bottom-left {
-  bottom: 27%;
-  left: 3%;
-}
-
-.whu-hex-card--bottom-left:hover {
-  transform: translateY(-5px) scale(1.02);
-}
-
-.whu-hex-card--top-left {
-  top: 27%;
-  left: 3%;
-}
-
-.whu-hex-card--top-left:hover {
-  transform: translateY(-5px) scale(1.02);
-}
-
-/* ── Card icon badge ───────────────────────────────────────────── */
-.whu-hex-icon {
-  flex-shrink: 0;
-  width: 42px;
-  height: 42px;
-  border-radius: 0.7rem;
-  background:
-    linear-gradient(135deg,
-      rgba(204, 34, 0, 0.14) 0%,
-      rgba(204, 34, 0, 0.04) 100%
-    );
-  border: 1px solid rgba(204, 34, 0, 0.22);
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.18),
-    0 0 0 1px rgba(204, 34, 0, 0.06) inset;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--lime);
-  transition:
-    background 0.35s ease,
-    border-color 0.35s ease,
-    box-shadow 0.35s ease;
-}
-
-.whu-hex-icon svg {
-  width: 18px;
-  height: 18px;
-}
-
-.whu-hex-card:hover .whu-hex-icon {
-  background: linear-gradient(135deg,
-    rgba(204, 34, 0, 0.22) 0%,
-    rgba(204, 34, 0, 0.08) 100%
-  );
-  border-color: rgba(204, 34, 0, 0.40);
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.18),
-    0 0 18px rgba(204, 34, 0, 0.22),
-    0 0 0 1px rgba(204, 34, 0, 0.10) inset;
-}
-
-/* ── Card content text ────────────────────────────────────────── */
-.whu-hex-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.whu-hex-title {
-  font-family: 'Syne', var(--font-syne), system-ui, sans-serif;
-  font-size: clamp(0.82rem, 1.05vw, 0.92rem);
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: -0.015em;
-  line-height: 1.3;
-  margin: 0 0 0.38rem;
-}
-
-.whu-hex-desc {
-  font-size: clamp(0.70rem, 0.85vw, 0.77rem);
-  color: rgba(255, 255, 255, 0.50);
-  line-height: 1.58;
-  margin: 0;
-  font-family: system-ui, sans-serif;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   KEYFRAMES
-   ═══════════════════════════════════════════════════════════════ */
-
-@keyframes orbit-rotate {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to   { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-@keyframes crystal-float {
-  0%, 100% { transform: translateY(0px);  }
-  50%       { transform: translateY(-10px); }
+.glow-text-white {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.15), 0 0 40px rgba(255, 255, 255, 0.05);
 }
 
 /* ── Responsive ───────────────────────────────────────────────── */

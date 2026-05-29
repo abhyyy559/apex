@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ROADMAP_STEPS } from "@/lib/constants";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { SectionAura } from "@/components/effects/SectionAura";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -115,6 +116,7 @@ export function Roadmap() {
       aria-labelledby="roadmap-heading"
       className="relative section-padding overflow-hidden"
     >
+      <SectionAura variant="full" intensity={0.4} />
       <div className="relative z-10 max-w-6xl mx-auto">
         <SectionHeading
           label="Our Process"

@@ -3,14 +3,11 @@
 import { lazy, Suspense } from "react";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { CinematicBackground } from "@/components/effects/CinematicBackground";
-import { AuraBackground } from "@/components/effects/AuraBackground";
-import { AuraParticles } from "@/components/effects/AuraParticles";
-import { GlowRings } from "@/components/effects/GlowRings";
+import { CursorFollower } from "@/components/ui/CursorFollower";
 import { FloatingGlassNavbar } from "@/components/layout/FloatingGlassNavbar";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
 import { WhyUs } from "@/components/sections/WhyUs";
-import { MouseGlow } from "@/components/effects/MouseGlow";
 import { JsonLd } from "@/components/SEO/JsonLd";
 import { serviceSchema, breadcrumbSchema } from "@/lib/seo";
 
@@ -43,11 +40,8 @@ export function HomePageClient() {
       <JsonLd data={serviceSchema("Brand Identity Design", "Complete brand strategy and visual identity systems")} />
       <JsonLd data={serviceSchema("UI/UX Design", "User-centered interface design with focus on conversion")} />
       <JsonLd data={breadcrumbSchema(breadcrumbData)} />
-      <AuraBackground />
-      <AuraParticles count={30} />
-      <GlowRings />
       <CinematicBackground />
-      <MouseGlow color="rgba(204,34,0,0.07)" size={500} zIndex={10} />
+      <CursorFollower />
       <div className="relative z-[1]">
         <FloatingGlassNavbar />
         <main id="main-content">

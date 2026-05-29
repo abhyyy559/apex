@@ -7,7 +7,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useServices } from "@/hooks/useContent";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ParallaxTilt } from "@/components/ui/ParallaxTilt";
-import { SectionAura } from "@/components/effects/SectionAura";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { ParallaxSection } from "@/components/ui/ParallaxSection";
+import { MagneticButton } from "@/components/ui/MagneticButton";
 import { Button } from "@/components/ui/Button";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -66,7 +68,9 @@ export function ServicesPreview() {
       aria-labelledby="services-preview-heading"
       className="relative section-padding"
     >
-      <SectionAura variant="center" intensity={0.6} />
+      <ParallaxSection speed={0.08} direction="up" className="absolute inset-0 pointer-events-none">
+        <div className="w-full h-full" />
+      </ParallaxSection>
       <div className="relative z-10 max-w-6xl mx-auto">
         <SectionHeading
           label={data.section.label}
@@ -79,7 +83,7 @@ export function ServicesPreview() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 md:mt-16">
           {previewServices.map((service) => (
             <ParallaxTilt key={service.number} maxTilt={6} scale={1.03} glare={true}>
-              <div className="svc-card group relative rounded-2xl p-6 md:p-8 border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(204,34,0,0.2)] transition-all duration-500 min-h-[220px] flex flex-col">
+              <SpotlightCard className="svc-card rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(204,34,0,0.2)] transition-all duration-500 min-h-[220px] flex flex-col p-6 md:p-8">
                 <div className="w-10 h-10 mb-5 text-[#CC2200]">
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="w-full h-full">
                     {ICONS[service.icon] || ICONS.cube}
@@ -94,15 +98,17 @@ export function ServicesPreview() {
                 <p className="text-sm text-text-muted leading-relaxed flex-1">
                   {service.description}
                 </p>
-              </div>
+              </SpotlightCard>
             </ParallaxTilt>
           ))}
         </div>
 
         <div className="flex justify-center mt-10">
-          <Button href="/services" variant="glass">
-            View All Services
-          </Button>
+          <MagneticButton>
+            <Button href="/services" variant="glass">
+              View All Services
+            </Button>
+          </MagneticButton>
         </div>
       </div>
     </section>

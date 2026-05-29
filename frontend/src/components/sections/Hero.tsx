@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { HeroOrbs } from "@/components/effects/HeroOrbs";
 import { Button } from "@/components/ui/Button";
+import { MagneticButton } from "@/components/ui/MagneticButton";
 import { SplitText } from "@/components/ui/SplitText";
 import { useHero } from "@/hooks/useContent";
 import { useEffectCapabilities } from "@/hooks/useEffectCapabilities";
@@ -166,12 +167,14 @@ export function Hero({ className }: { className?: string }) {
         <div ref={ctaRef} className="flex flex-wrap gap-4 md:gap-5">
           {heroData.ctaButtons.map((button, index) => (
             <span key={index} className="hero-cta inline-block [transform:translateZ(20px)]">
-              <Button
-                href={button.href}
-                variant={button.variant as "gradient" | "glass"}
-              >
-                {button.text}
-              </Button>
+              <MagneticButton>
+                <Button
+                  href={button.href}
+                  variant={button.variant as "gradient" | "glass"}
+                >
+                  {button.text}
+                </Button>
+              </MagneticButton>
             </span>
           ))}
         </div>

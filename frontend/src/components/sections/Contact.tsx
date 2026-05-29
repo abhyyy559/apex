@@ -8,6 +8,7 @@ import { z } from "zod";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
+import { MagneticButton } from "@/components/ui/MagneticButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { useContact } from "@/hooks/useContent";
 import type { ContactFormState } from "@/types";
@@ -167,6 +168,7 @@ export function Contact({ className }: { className?: string }) {
           onSubmit={handleSubmit(onSubmit)}
           aria-busy={isSubmitting}
           noValidate
+          suppressHydrationWarning
         >
         <GlassPanel className="rounded-2xl p-8 md:p-12">
           <div className="absolute w-px h-px overflow-hidden" aria-hidden>
@@ -374,14 +376,16 @@ export function Contact({ className }: { className?: string }) {
             </div>
           )}
 
-          <Button
-            type="submit"
-            size="md"
-            className="w-full"
-            disabled={isSubmitting || sent || (captchaEnabled && !isCaptchaReady)}
-          >
-            {isSubmitting ? "Sending…" : sent ? "Message Sent" : "Send Message →"}
-          </Button>
+          <MagneticButton className="w-full">
+            <Button
+              type="submit"
+              size="md"
+              className="w-full"
+              disabled={isSubmitting || sent || (captchaEnabled && !isCaptchaReady)}
+            >
+              {isSubmitting ? "Sending…" : sent ? "Message Sent" : "Send Message →"}
+            </Button>
+          </MagneticButton>
         </GlassPanel>
       </form>
       </Reveal>

@@ -64,6 +64,7 @@ export function Faq() {
                   type="button"
                   onClick={() => toggle(index)}
                   aria-expanded={isOpen}
+                  suppressHydrationWarning
                   className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#CC2200]"
                 >
                   <span className="font-[family-name:var(--font-syne)] text-sm md:text-base font-semibold text-white pr-4">

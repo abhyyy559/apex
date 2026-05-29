@@ -186,7 +186,7 @@ article {
   mix-blend-mode: screen;
 }
 
-.cinematic-bg__glow--cyan {
+.cinematic-bg__glow--tl {
   width: min(55vw, 520px);
   height: min(55vw, 520px);
   top: -8%;
@@ -195,7 +195,7 @@ article {
   animation: cinematic-drift 22s ease-in-out infinite alternate-reverse;
 }
 
-.cinematic-bg__glow--purple {
+.cinematic-bg__glow--right {
   width: min(45vw, 420px);
   height: min(45vw, 420px);
   top: 35%;
@@ -205,7 +205,7 @@ article {
   animation-delay: -6s;
 }
 
-.cinematic-bg__glow--magenta {
+.cinematic-bg__glow--bl {
   width: min(40vw, 380px);
   height: min(40vw, 380px);
   bottom: -5%;
@@ -257,13 +257,13 @@ article {
     animation: none;
   }
 
-  .cinematic-bg__glow--cyan {
+  .cinematic-bg__glow--tl {
     width: 70vw;
     height: 50vw;
   }
 
-  .cinematic-bg__glow--purple,
-  .cinematic-bg__glow--magenta {
+  .cinematic-bg__glow--right,
+  .cinematic-bg__glow--bl {
     display: none;
   }
 

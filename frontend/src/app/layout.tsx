@@ -32,6 +32,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://apex-studio-mu.vercel.app"),
   title: "ApeX - Innovative Digital Solutions",
   description: "Transform your business with cutting-edge digital solutions. We deliver exceptional web development, design, and technology services to help you succeed in the digital age.",
   openGraph: {

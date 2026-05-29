@@ -9,7 +9,8 @@ import { usePortfolio } from "@/hooks/useContent";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ParallaxTilt } from "@/components/ui/ParallaxTilt";
 import { GlowBorder } from "@/components/ui/GlowBorder";
-import { SectionAura } from "@/components/effects/SectionAura";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { MagneticButton } from "@/components/ui/MagneticButton";
 import { Button } from "@/components/ui/Button";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -58,7 +59,6 @@ export function PortfolioShowcase() {
       aria-labelledby="showcase-heading"
       className="relative section-padding"
     >
-      <SectionAura variant="center" color="rgba(204,34,0,0.04)" intensity={0.5} />
       <div className="relative z-10 max-w-6xl mx-auto">
         <SectionHeading
           label={data.section.label}
@@ -72,6 +72,7 @@ export function PortfolioShowcase() {
           {featured.map((project) => (
             <div key={project.slug} className="portfolio-card">
               <ParallaxTilt maxTilt={5} scale={1.02}>
+                <SpotlightCard className="rounded-2xl">
                 <GlowBorder>
                 <Link
                   href={`/portfolio/${project.slug}`}
@@ -88,15 +89,18 @@ export function PortfolioShowcase() {
                   </div>
                   </Link>
                 </GlowBorder>
+                </SpotlightCard>
               </ParallaxTilt>
             </div>
           ))}
         </div>
 
         <div className="flex justify-center mt-10">
-          <Button href="/portfolio" variant="glass">
-            View All Projects
-          </Button>
+          <MagneticButton>
+            <Button href="/portfolio" variant="glass">
+              View All Projects
+            </Button>
+          </MagneticButton>
         </div>
       </div>
     </section>

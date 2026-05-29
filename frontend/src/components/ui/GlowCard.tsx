@@ -44,7 +44,6 @@ export function GlowCard({
         }}
         aria-hidden
       />
-      <div className="absolute inset-0 rounded-2xl pointer-events-none glow-border" aria-hidden />
       <div className="relative z-[1]">{children}</div>
     </Tag>
   );

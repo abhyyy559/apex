@@ -63,7 +63,7 @@ export function Button({
 
   const { type = "button", ...rest } = props as ButtonAsButton;
   return (
-    <button type={type} className={classes} {...rest}>
+    <button type={type} className={classes} suppressHydrationWarning {...rest}>
       {variant === "glow" && (
         <span className="absolute inset-0 rounded-full bg-gradient-to-r from-[#CC2200] via-[#FF4422] to-[#CC2200] bg-[length:200%_100%] animate-gradient-shift" />
       )}

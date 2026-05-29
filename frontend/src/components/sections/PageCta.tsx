@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/Button";
+import { MagneticButton } from "@/components/ui/MagneticButton";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -44,9 +45,11 @@ export function PageCta({ title, description, ctaText, ctaHref }: PageCtaProps) 
           {description}
         </p>
         <div className="cta-anim">
-          <Button href={ctaHref} size="lg">
-            {ctaText}
-          </Button>
+          <MagneticButton>
+            <Button href={ctaHref} size="lg">
+              {ctaText}
+            </Button>
+          </MagneticButton>
         </div>
       </div>
     </section>
